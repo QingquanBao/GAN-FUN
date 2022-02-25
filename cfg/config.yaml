@@ -1,0 +1,17 @@
+
+default:
+  - model: GAN
+
+seed: 1337
+dataset: MNIST
+img_size: 32
+channel: 3
+latent_dim: 16
+
+batch_size: 128
+lr_g: 0.001
+lr_d: 0.001
+optimizer: adam # options=[adam, rmsprop]
+
+epoches: 10
+maxD_steps: 10
