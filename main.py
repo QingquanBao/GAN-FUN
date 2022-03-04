@@ -3,6 +3,7 @@ import hydra
 from collections import OrderedDict
 from tqdm import tqdm
 
+from torch.utils.tensorboard import SummaryWriter
 import torch
 import torch.nn.functional as F
 import torchvision

@@ -5,7 +5,7 @@ default:
 seed: 1337
 dataset: MNIST
 img_size: 32
-channel: 3
+channel: 1
 latent_dim: 16
 
 batch_size: 128

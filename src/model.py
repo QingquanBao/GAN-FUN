@@ -24,7 +24,7 @@ class Generator(nn.Module):
             nn.ConvTranspose2d(2 * self.cfg.channel, self.cfg.channel, 4, 2, 1),
             nn.ReLU(),
             nn.BatchNorm2d(self.cfg.channel),
-            nn.ConvTranspose2d(self.cfg.channel, self.cfg.img_size, 4, 2, 1),
+            nn.ConvTranspose2d(self.cfg.channel,self.cfg.channel , 4, 2, 1),
             nn.Sigmoid()
         )
 
@@ -32,7 +32,7 @@ class Generator(nn.Module):
         # Map latent into appropriate size for transposed convolutions
         x = self.latent_to_features(input_data)
         # Reshape
-        x = x.view(-1, 8 * self.dim, self.feature_sizes[0], self.feature_sizes[1])
+        x = x.view(-1, 8 * self.cfg.channel, self.feature_sizes[0], self.feature_sizes[1])
         # Return generated image
         return self.features_to_image(x)
 
@@ -75,3 +75,11 @@ class LeNet(nn.Module):
         x = F.relu(self.fc3(x))
         x = self.fc4(x)
         return x
+
+    def num_flat_features(self, x):
+        size = x.size()[1:]  # all dimensions except the batch dimension
+        num_features = 1
+        for s in size:
+            num_features *= s
+        return num_features
+
