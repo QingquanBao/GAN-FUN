@@ -3,10 +3,10 @@ import hydra
 from collections import OrderedDict
 from tqdm import tqdm
 
+from torch.utils.tensorboard import SummaryWriter
 import torch
 import torch.nn.functional as F
 import torchvision
-from torch.utils.tensorboard import SummaryWriter
 
 from src import model
 from src.dataloader import get_mnist_dataloaders
@@ -102,7 +102,7 @@ def main(cfg):
     orig_cwd = hydra.utils.get_original_cwd()
     train_loader, _ = get_mnist_dataloaders(orig_cwd, cfg.img_size, cfg.batch_size)
 
-    logger = SummaryWriter('./GAN_log')
+    logger = SummaryWriter()
     #logger = None
 
     generator = model.Generator(cfg)
