@@ -7,8 +7,11 @@ from torch.utils.tensorboard import SummaryWriter
 import torch
 import torch.nn.functional as F
 import torchvision
+<<<<<<< HEAD
 #from torch.utils.tensorboard import SummaryWriter
 from tensorboardX import SummaryWriter
+=======
+>>>>>>> 71f909bc2863a1ab755b6dae0eb5a8469d3ba888
 
 from src import model
 from src.dataloader import get_mnist_dataloaders
