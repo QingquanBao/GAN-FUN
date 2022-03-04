@@ -1,6 +1,7 @@
 import torch
 import torch.nn.functional as F
 from torch import nn
+import hydra
 
 class Generator(nn.Module):
     def __init__(self, cfg):
@@ -59,10 +60,10 @@ class LeNet(nn.Module):
         self.conv1 = nn.Conv2d(1, 6, 7)
         self.conv2 = nn.Conv2d(6, 16, 3)
         # an affine operation: y = Wx + b
-        self.fc1 = nn.Linear(16 * 6 * 6, 120)  # 6*6 from image dimension
+        self.fc1 = nn.Linear(16 * 5 * 5, 120)  # 6*6 from image dimension
         self.fc2 = nn.Linear(120, 84)
         self.fc3 = nn.Linear(84, 20)
-        self.fc4 = nn.Linear(20, 2)
+        self.fc4 = nn.Linear(20, 1)
 
     def forward(self, x):
         # Max pooling over a (2, 2) window
@@ -73,7 +74,7 @@ class LeNet(nn.Module):
         x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
         x = F.relu(self.fc3(x))
-        x = self.fc4(x)
+        x = F.sigmoid(self.fc4(x))
         return x
 
     def num_flat_features(self, x):
@@ -82,4 +83,24 @@ class LeNet(nn.Module):
         for s in size:
             num_features *= s
         return num_features
+
+
+@hydra.main(config_path="../cfg", config_name='config')
+def test(cfg):
+    G = Generator(cfg)
+    D = Discriminator(cfg)
+
+    img = torch.randn((1,1,32,32))
+    out = D(img)
+    print(out.shape)
+
+    hidden = torch.randn((1, 16))
+    out_img = G(hidden)
+
+    print(out_img.shape)
+
+
+if __name__ == '__main__':
+    test()
+
 

@@ -3,15 +3,10 @@ import hydra
 from collections import OrderedDict
 from tqdm import tqdm
 
-from torch.utils.tensorboard import SummaryWriter
 import torch
 import torch.nn.functional as F
 import torchvision
-<<<<<<< HEAD
-#from torch.utils.tensorboard import SummaryWriter
 from tensorboardX import SummaryWriter
-=======
->>>>>>> 71f909bc2863a1ab755b6dae0eb5a8469d3ba888
 
 from src import model
 from src.dataloader import get_mnist_dataloaders
@@ -35,7 +30,7 @@ def trainGAN(G, D, dataloader, opt_g, opt_d, logger, cfg):
 
     def on_epoch_end(generator, current_epoch, cfg):
         valid_z = torch.randn(16, cfg.latent_dim)
-        z = valid_z.type_as(generator.model[0].weight)
+        #z = valid_z.type_as(generator.model[0].weight)
 
         # log sampled images
         sample_imgs = generator(z)
@@ -47,7 +42,7 @@ def trainGAN(G, D, dataloader, opt_g, opt_d, logger, cfg):
     for e in range(cfg.epoches):
         minG_steps = 0
         maxD_steps = 0
-        for i, batches in tqdm(enumerate(dataloader)):
+        for i, batches in enumerate(tqdm(dataloader)):
             imgs = batches[0]
             # sample noise
             z = torch.randn(imgs.shape[0], cfg.latent_dim)

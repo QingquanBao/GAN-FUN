@@ -13,5 +13,5 @@ lr_g: 0.001
 lr_d: 0.001
 optimizer: adam # options=[adam, rmsprop]
 
-epoches: 10
+epoches: 5
 maxD_steps: 10
