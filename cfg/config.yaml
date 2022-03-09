@@ -6,12 +6,12 @@ seed: 1337
 dataset: MNIST
 img_size: 32
 channel: 1
-latent_dim: 16
+latent_dim: 50
 
-batch_size: 128
-lr_g: 0.001
-lr_d: 0.001
+batch_size: 64
+lr_g: 0.0001
+lr_d: 0.0001
 optimizer: adam # options=[adam, rmsprop]
 
-epoches: 5
-maxD_steps: 10
+epoches: 10
+maxD_steps: 2

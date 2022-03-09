@@ -7,6 +7,8 @@ import torch
 import torch.nn.functional as F
 import torchvision
 from tensorboardX import SummaryWriter
+import numpy as np
+import random
 
 from src import model
 from src.dataloader import get_mnist_dataloaders
@@ -14,7 +16,7 @@ from src.dataloader import get_mnist_dataloaders
 AVAIL_GPUS = min(1, torch.cuda.device_count())
 
 
-def trainGAN(G, D, dataloader, opt_g, opt_d, logger, cfg):
+def trainGAN(G, D, dataloader, opt_g, opt_d, logger, cfg, device):
 
     def adversarial_loss(y_hat, y):
         return F.binary_cross_entropy(y_hat, y)
@@ -29,7 +31,7 @@ def trainGAN(G, D, dataloader, opt_g, opt_d, logger, cfg):
         logger.add_image("generated_images", grid, step)
 
     def on_epoch_end(generator, current_epoch, cfg):
-        valid_z = torch.randn(16, cfg.latent_dim)
+        valid_z = torch.randn(16, cfg.latent_dim).to(device)
         #z = valid_z.type_as(generator.model[0].weight)
 
         # log sampled images
@@ -43,15 +45,15 @@ def trainGAN(G, D, dataloader, opt_g, opt_d, logger, cfg):
         minG_steps = 0
         maxD_steps = 0
         for i, batches in enumerate(tqdm(dataloader)):
-            imgs = batches[0]
+            imgs = batches[0].to(device)
             # sample noise
-            z = torch.randn(imgs.shape[0], cfg.latent_dim)
+            z = torch.randn(imgs.shape[0], cfg.latent_dim).to(device)
             z = z.type_as(imgs)
 
             # max Discriminator 
-            if i % cfg.maxD_steps == cfg.maxD_steps-1:
-                G.eval()
-                D.train()
+            if i % cfg.maxD_steps != cfg.maxD_steps-1:
+                #G.eval()
+                #D.train()
                 # how well can it label as real?
                 valid = torch.ones(imgs.size(0), 1)
                 valid = valid.type_as(imgs)
@@ -74,12 +76,12 @@ def trainGAN(G, D, dataloader, opt_g, opt_d, logger, cfg):
 
             # min Generator
             else:
-                G.train()
-                D.eval()   
+                #G.train()
+                #D.eval()   
                 
                 # ground truth result (ie: all fake)
                 # put on GPU because we created this tensor inside training_loop
-                valid = torch.ones(imgs.size(0), 1)
+                valid = torch.zeros(imgs.size(0), 1)
                 valid = valid.type_as(imgs)
 
                 # adversarial loss is binary cross-entropy
@@ -99,24 +101,31 @@ def trainGAN(G, D, dataloader, opt_g, opt_d, logger, cfg):
 @hydra.main(config_path="./cfg", config_name='config')
 def main(cfg):
     torch.manual_seed(cfg.seed)
+    np.random.seed(cfg.seed)
+    random.seed(cfg.seed)
+    torch.backends.cudnn.benchmark = False
+    #torch.use_deterministic_algorithms(True)
+
     orig_cwd = hydra.utils.get_original_cwd()
     train_loader, _ = get_mnist_dataloaders(orig_cwd, cfg.img_size, cfg.batch_size)
 
     logger = SummaryWriter()
     #logger = None
 
-    generator = model.Generator(cfg)
-    discriminator = model.Discriminator(cfg)
+    device = 'cuda' if torch.cuda.is_available() else 'cpu'
+
+    generator = model.Generator(cfg).to(device)
+    discriminator = model.Discriminator(cfg).to(device)
 
     if cfg.optimizer == 'adam':
-        opt_g = torch.optim.Adam(generator.parameters(),     lr=cfg.lr_g)
-        opt_d = torch.optim.Adam(discriminator.parameters(), lr=cfg.lr_d)
+        opt_g = torch.optim.Adam(generator.parameters(),     lr=cfg.lr_g, betas=(0.5, 0.999))
+        opt_d = torch.optim.Adam(discriminator.parameters(), lr=cfg.lr_d, betas=(0.5, 0.999))
     elif cfg.optimizer == 'rmsprop':
         opt_g = torch.optim.RMSprop(generator.parameters(),     lr=cfg.lr_g)
         opt_d = torch.optim.RMSprop(discriminator.parameters(), lr=cfg.lr_d)
 
 
-    trainGAN(G=generator, D=discriminator, dataloader=train_loader, opt_g=opt_g, opt_d=opt_d, logger=logger, cfg=cfg)
+    trainGAN(G=generator, D=discriminator, dataloader=train_loader, opt_g=opt_g, opt_d=opt_d, logger=logger, cfg=cfg, device=device)
 
 
 if __name__ == '__main__':

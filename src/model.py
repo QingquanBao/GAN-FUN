@@ -17,14 +17,14 @@ class Generator(nn.Module):
 
         self.features_to_image = nn.Sequential(
             nn.ConvTranspose2d(8 * self.cfg.channel, 4 * self.cfg.channel, 4, 2, 1),
-            nn.ReLU(),
             nn.BatchNorm2d(4 * self.cfg.channel),
+            nn.ReLU(),
             nn.ConvTranspose2d(4 * self.cfg.channel, 2 * self.cfg.channel, 4, 2, 1),
-            nn.ReLU(),
             nn.BatchNorm2d(2 * self.cfg.channel),
-            nn.ConvTranspose2d(2 * self.cfg.channel, self.cfg.channel, 4, 2, 1),
             nn.ReLU(),
+            nn.ConvTranspose2d(2 * self.cfg.channel, self.cfg.channel, 4, 2, 1),
             nn.BatchNorm2d(self.cfg.channel),
+            nn.ReLU(),
             nn.ConvTranspose2d(self.cfg.channel,self.cfg.channel , 4, 2, 1),
             nn.Sigmoid()
         )

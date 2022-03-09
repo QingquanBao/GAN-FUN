@@ -1,6 +1,13 @@
 from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
+import torch
+import numpy
+import random
 
+def seed_worker(worker_id):
+    worker_seed = torch.initial_seed() % 2**32
+    numpy.random.seed(worker_seed)
+    random.seed(worker_seed)
 
 def get_mnist_dataloaders(path, img_size=28, batch_size=128):
     """MNIST dataloader with (32, 32) sized images."""
@@ -15,8 +22,8 @@ def get_mnist_dataloaders(path, img_size=28, batch_size=128):
     test_data = datasets.MNIST(path + '/data', train=False,
                                transform=all_transforms)
     # Create dataloaders
-    train_loader = DataLoader(train_data, batch_size=batch_size, shuffle=True)
-    test_loader = DataLoader(test_data, batch_size=batch_size, shuffle=True)
+    train_loader = DataLoader(train_data, batch_size=batch_size, shuffle=True, num_workers=4, worker_init_fn=seed_worker)
+    test_loader = DataLoader(test_data, batch_size=batch_size, shuffle=True, num_workers=4, worker_init_fn=seed_worker)
     return train_loader, test_loader
 
 
