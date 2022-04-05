@@ -1,0 +1,7 @@
+arch: mlp #choices=[mlp, deconv]
+latent_dim: 2
+kld_weight: 0.001
+
+lr: 0.009
+optimizer: adam # options=[adam, rmsprop]
+loss: mse # choices=[mse, bce]

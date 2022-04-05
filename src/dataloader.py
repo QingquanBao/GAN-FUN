@@ -4,6 +4,8 @@ import torch
 import numpy
 import random
 
+NUM_WOKERS = 16
+
 def seed_worker(worker_id):
     worker_seed = torch.initial_seed() % 2**32
     numpy.random.seed(worker_seed)
@@ -14,7 +16,9 @@ def get_mnist_dataloaders(path, img_size=28, batch_size=128):
     # Resize images so they are a power of 2
     all_transforms = transforms.Compose([
         transforms.Resize(img_size),
-        transforms.ToTensor()
+        transforms.ToTensor(),
+        #transforms.Normalize([0.5], [0.5])
+        #transforms.Normalize((0.1307,), (0.3081,))
     ])
     # Get train and test data
     train_data = datasets.MNIST(path + '/data', train=True, download=True,
@@ -22,8 +26,8 @@ def get_mnist_dataloaders(path, img_size=28, batch_size=128):
     test_data = datasets.MNIST(path + '/data', train=False,
                                transform=all_transforms)
     # Create dataloaders
-    train_loader = DataLoader(train_data, batch_size=batch_size, shuffle=True, num_workers=4, worker_init_fn=seed_worker)
-    test_loader = DataLoader(test_data, batch_size=batch_size, shuffle=True, num_workers=4, worker_init_fn=seed_worker)
+    train_loader = DataLoader(train_data, batch_size=batch_size, shuffle=True, num_workers=NUM_WOKERS, worker_init_fn=seed_worker)
+    test_loader = DataLoader(test_data, batch_size=batch_size, shuffle=True, num_workers=NUM_WOKERS, worker_init_fn=seed_worker)
     return train_loader, test_loader
 
 
