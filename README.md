@@ -17,12 +17,7 @@ python vae.py model=vae2
 ```
 
 
-<img src="figs/1dvae.png" alt="drawing" width="200"/>
-
-
-```
-<img src="figs/2dvae.png" alt="drawing" width="200"/>
-```
+<img src="figs/1dvae.png" alt="drawing" width="300"/>  <img src="figs/2dvae.png" alt="drawing" width="300"/>
 
 
 ## GAN
