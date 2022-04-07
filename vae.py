@@ -15,6 +15,19 @@ from src.dataloader import get_mnist_dataloaders
 
 AVAIL_GPUS = min(1, torch.cuda.device_count())
 
+def validate(model, dataloader, device):
+    loss = []
+    model.eval()
+    for i, batches in enumerate(dataloader):
+        imgs = batches[0].to(device)
+
+        mu, log_var, out = model(imgs)
+
+        loss_dict = model.loss(imgs, mu, log_var, out)
+        loss.append(loss_dict['Reconstruction_Loss'])
+
+    return sum(loss) / len(loss)
+ 
 
 def train(model, dataloader, opt, logger, cfg, device):
     def cal_loss(input, mu, log_var, recons):
@@ -54,9 +67,14 @@ def train(model, dataloader, opt, logger, cfg, device):
         grid = torchvision.utils.make_grid(sample_imgs, nrow=num)
         logger.add_image("generated_val_images", grid, current_epoch)
 
+        val_loss = validate(model, test_loader, device)
+        logger.add_scalar('val_reconstucion_loss', val_loss, current_epoch)
+
+
+    train_loader, test_loader = dataloader
     steps = 0
-    for e in range(cfg.epoches):
-        for i, batches in enumerate(tqdm(dataloader)):
+    for e in tqdm(range(cfg.epoches)):
+        for i, batches in enumerate(train_loader):
             model.train()
             opt.zero_grad()
 
@@ -82,6 +100,7 @@ def train(model, dataloader, opt, logger, cfg, device):
         on_epoch_end(model, e, cfg)
 
 
+
 @hydra.main(config_path="./cfg", config_name='config')
 def main(cfg):
     torch.manual_seed(cfg.seed)
@@ -91,7 +110,7 @@ def main(cfg):
     #torch.use_deterministic_algorithms(True)
 
     orig_cwd = hydra.utils.get_original_cwd()
-    train_loader, _ = get_mnist_dataloaders(orig_cwd, cfg.img_size, cfg.batch_size)
+    train_loader, test_loader = get_mnist_dataloaders(orig_cwd, cfg.img_size, cfg.batch_size)
 
     logger = SummaryWriter()
     #logger = None
@@ -105,7 +124,7 @@ def main(cfg):
     elif cfg.model.optimizer == 'rmsprop':
         opt = torch.optim.RMSprop(model.parameters(),     lr=cfg.model.lr)
 
-    train(model=model, dataloader=train_loader, opt=opt, logger=logger, cfg=cfg, device=device)
+    train(model=model, dataloader=[train_loader, test_loader], opt=opt, logger=logger, cfg=cfg, device=device)
 
 
 if __name__ == '__main__':

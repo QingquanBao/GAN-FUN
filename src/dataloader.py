@@ -27,7 +27,7 @@ def get_mnist_dataloaders(path, img_size=28, batch_size=128):
                                transform=all_transforms)
     # Create dataloaders
     train_loader = DataLoader(train_data, batch_size=batch_size, shuffle=True, num_workers=NUM_WOKERS, worker_init_fn=seed_worker)
-    test_loader = DataLoader(test_data, batch_size=batch_size, shuffle=True, num_workers=NUM_WOKERS, worker_init_fn=seed_worker)
+    test_loader = DataLoader(test_data, batch_size=batch_size, shuffle=False, num_workers=NUM_WOKERS, worker_init_fn=seed_worker)
     return train_loader, test_loader
 
 

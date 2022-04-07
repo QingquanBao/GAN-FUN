@@ -8,7 +8,7 @@ import torchvision
 
 import pytorch_lightning as pl
 from pytorch_lightning import LightningModule, Trainer
-from src import model
+from src import vanilla_gan
 from src.dataloader import get_mnist_dataloaders
 
 AVAIL_GPUS = min(1, torch.cuda.device_count())
@@ -17,8 +17,8 @@ class GAN(LightningModule):
     def __init__(self, cfg):
         super().__init__()
         self.cfg = cfg
-        self.generator = model.Generator(cfg)
-        self.discriminator = model.Discriminator(cfg)
+        self.generator = vanilla_gan.Generator(cfg)
+        self.discriminator = vanilla_gan.Discriminator(cfg)
 
     def forward(self, z):   
         return self.generator(z)
